@@ -109,4 +109,19 @@ public final class TextUtils {
 
 		return null;
 	}
+
+	/**
+	 * Converts a sentence to Title Case
+	 * @param string the text you want to make titleCase
+	 * @return title case converted text
+	 */
+	public static String titleCase(String string) {
+		String[] split = string.toLowerCase().split(" ");
+
+		for (int i = 0; i < split.length; i++) {
+			split[i] = (Character.toUpperCase(split[i].charAt(0))) + split[i].substring(1);
+		}
+
+		return String.join(" ", split);
+	}
 }

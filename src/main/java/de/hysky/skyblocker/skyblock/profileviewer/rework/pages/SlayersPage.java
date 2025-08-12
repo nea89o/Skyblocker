@@ -4,6 +4,9 @@ import de.hysky.skyblocker.annotations.Init;
 import de.hysky.skyblocker.skyblock.profileviewer.model.SlayerData;
 import de.hysky.skyblocker.skyblock.profileviewer.rework.*;
 import de.hysky.skyblocker.skyblock.profileviewer.rework.widgets.BarWidget;
+import de.hysky.skyblocker.skyblock.profileviewer.rework.widgets.EntityViewerWidget;
+import de.hysky.skyblocker.skyblock.profileviewer.rework.widgets.PlayerMetaWidget;
+import de.hysky.skyblocker.skyblock.profileviewer.rework.widgets.SlayerWidget;
 import de.hysky.skyblocker.skyblock.tabhud.util.Ico;
 import net.minecraft.item.ItemStack;
 import java.util.ArrayList;
@@ -15,34 +18,27 @@ public class SlayersPage implements ProfileViewerPage {
 	List<ProfileViewerWidget.Instance> widgets = new ArrayList<>();
 
 	public SlayersPage(ProfileLoadState.SuccessfulLoad load) {
+		var playerWidget = widget(0, 0, new EntityViewerWidget(load.mainMemberId()));
+		widgets.add(playerWidget);
+		var playerStatsWidget = widget(0, playerWidget.getY() + playerWidget.getHeight() + ProfileViewerScreenRework.GAP, new PlayerMetaWidget(load));
+		widgets.add(playerStatsWidget);
 		var slayerData = load.member().slayer;
-		// TODO: Maybe make it's own SlayerWidget
-		List<ProfileViewerWidget> slayers = new ArrayList<>();
-		slayers.add(new BarWidget(SlayerData.Slayer.REVENANT_HORROR.getName(), SlayerData.Slayer.REVENANT_HORROR.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.REVENANT_HORROR), OptionalInt.empty(), OptionalInt.empty()));
-		slayers.add(new BarWidget(SlayerData.Slayer.TARANTULA_BROODFATHER.getName(), SlayerData.Slayer.TARANTULA_BROODFATHER.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.TARANTULA_BROODFATHER), OptionalInt.empty(), OptionalInt.empty()));
-		slayers.add(new BarWidget(SlayerData.Slayer.SVEN_PACKMASTER.getName(), SlayerData.Slayer.SVEN_PACKMASTER.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.SVEN_PACKMASTER), OptionalInt.empty(), OptionalInt.empty()));
-		slayers.add(new BarWidget(SlayerData.Slayer.VOIDGLOOM_SERAPH.getName(), SlayerData.Slayer.VOIDGLOOM_SERAPH.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.VOIDGLOOM_SERAPH), OptionalInt.empty(), OptionalInt.empty()));
-		slayers.add(new BarWidget(SlayerData.Slayer.RIFTSTALKER_BLOODFIEND.getName(), SlayerData.Slayer.RIFTSTALKER_BLOODFIEND.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.RIFTSTALKER_BLOODFIEND), OptionalInt.empty(), OptionalInt.empty()));
-		slayers.add(new BarWidget(SlayerData.Slayer.INFERNO_DEMONLORD.getName(), SlayerData.Slayer.INFERNO_DEMONLORD.getIcon(), slayerData.getSkillLevel(SlayerData.Slayer.INFERNO_DEMONLORD), OptionalInt.empty(), OptionalInt.empty()));
-
-		slayers.add(new SlayerWidget(SlayerData.Slayer.REVENANT_HORROR, slayerData.getSlayerData(SlayerData.Slayer.REVENANT_HORROR)));
-		slayers.add(new SlayerWidget(SlayerData.Slayer.TARANTULA_BROODFATHER, slayerData.getSlayerData(SlayerData.Slayer.TARANTULA_BROODFATHER)));
-		slayers.add(new SlayerWidget(SlayerData.Slayer.SVEN_PACKMASTER, slayerData.getSlayerData(SlayerData.Slayer.SVEN_PACKMASTER)));
-		slayers.add(new SlayerWidget(SlayerData.Slayer.VOIDGLOOM_SERAPH, slayerData.getSlayerData(SlayerData.Slayer.VOIDGLOOM_SERAPH)));
-		slayers.add(new SlayerWidget(SlayerData.Slayer.RIFTSTALKER_BLOODFIEND, slayerData.getSlayerData(SlayerData.Slayer.RIFTSTALKER_BLOODFIEND)));
-		slayers.add(new SlayerWidget(SlayerData.Slayer.INFERNO_DEMONLORD, slayerData.getSlayerData(SlayerData.Slayer.INFERNO_DEMONLORD)));
-
-		int i = 0;
-		for (var slayer : slayers) {
-			int x = i < 6 ? 88 : 88 + 113;
-			int y = (i % 6) * (2 + 26);
-			i++;
-			widgets.add(widget(
-					x, y, slayer
-			));
+		List<ProfileViewerWidget> slayerWidgets = new ArrayList<>();
+		for (SlayerData.Slayer slayer : SlayerData.Slayer.values()) {
+			slayerWidgets.add(new BarWidget(slayer.getName(), slayer.getIcon(), slayerData.getSkillLevel(slayer), OptionalInt.empty(), OptionalInt.empty()));
 		}
-		widgets.add(widget(0, 0, new EntityViewerWidget(load.mainMemberId())));
-		widgets.add(widget(0, 112, new PlayerMetaWidget(load)));
+		for (SlayerData.Slayer slayer : SlayerData.Slayer.values()) {
+			slayerWidgets.add(new SlayerWidget(slayer, slayerData.getSlayerData(slayer)));
+		}
+
+		int skillIndex = 0;
+		int defaultSlayerX = calculateX();
+		for (var widget : slayerWidgets) {
+			int x = (skillIndex < 6 ? 0 : widget.getWidth() + ProfileViewerScreenRework.GAP) + ProfileViewerScreenRework.GAP;
+			int y = (skillIndex % 6) * (2 + widget.getHeight());
+			widgets.add(widget(defaultSlayerX + x, y, widget));
+			skillIndex++;
+		}
 	}
 
 	@Init

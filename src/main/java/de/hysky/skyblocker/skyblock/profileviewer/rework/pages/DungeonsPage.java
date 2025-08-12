@@ -32,66 +32,66 @@ public class DungeonsPage implements ProfileViewerPage {
 
 	public DungeonsPage(ProfileLoadState.SuccessfulLoad load) {
 		var dungeonsData = load.member().dungeons;
-		widgets.add(
-				widget(0, 0, new BarWidget(PlayerData.Skill.CATACOMBS.getName(), PlayerData.Skill.CATACOMBS.getIcon(), PlayerData.Skill.CATACOMBS.getLevelInfo(dungeonsData.dungeonInfo.catacombs.experience), OptionalInt.empty(), OptionalInt.empty()))
-		);
-		List<BarWidget> classes = new ArrayList<>();
-		classes.add(new BarWidget(Dungeons.Class.HEALER.getName(), Dungeons.Class.HEALER.getIcon(), dungeonsData.getClassData(Dungeons.Class.HEALER).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
-		classes.add(new BarWidget(Dungeons.Class.MAGE.getName(), Dungeons.Class.MAGE.getIcon(), dungeonsData.getClassData(Dungeons.Class.MAGE).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
-		classes.add(new BarWidget(Dungeons.Class.BERSERK.getName(), Dungeons.Class.BERSERK.getIcon(), dungeonsData.getClassData(Dungeons.Class.BERSERK).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
-		classes.add(new BarWidget(Dungeons.Class.ARCHER.getName(), Dungeons.Class.ARCHER.getIcon(), dungeonsData.getClassData(Dungeons.Class.ARCHER).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
-		classes.add(new BarWidget(Dungeons.Class.TANK.getName(), Dungeons.Class.TANK.getIcon(), dungeonsData.getClassData(Dungeons.Class.TANK).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
+		List<BarWidget> dungeonClassWidgets = new ArrayList<>();
+		for (Dungeons.Class dungeonClass : Dungeons.Class.values()) {
+			String name = dungeonClass.getName();
+			if (dungeonsData.selectedDungeonClass.equals(name.toLowerCase())) name = "§a" + name + "§r";
+			dungeonClassWidgets.add(new BarWidget(name, dungeonClass.getIcon(), dungeonsData.getClassData(dungeonClass).getLevelInfo(), OptionalInt.empty(), OptionalInt.empty()));
+		}
 
 		LevelFinder.LevelInfo classAverageLevelInfo = new LevelFinder.LevelInfo(0, 0);
-		for (var widget : classes) {
-			var currentClassInfo = widget.getLevelInfo();
+		for (var dungeonClassWidget : dungeonClassWidgets) {
+			var currentClassInfo = dungeonClassWidget.getLevelInfo();
 			classAverageLevelInfo.level += currentClassInfo.level;
-			classAverageLevelInfo.fill += currentClassInfo.fill; // Should partial levels count towards class average?
+			// Should partial levels count towards class average?
+			classAverageLevelInfo.fill += currentClassInfo.fill;
+
 			if (classAverageLevelInfo.nextLevelXP == 0
 					|| classAverageLevelInfo.nextLevelXP < currentClassInfo.nextLevelXP
-					|| (classAverageLevelInfo.nextLevelXP == currentClassInfo.nextLevelXP && classAverageLevelInfo.levelXP < currentClassInfo.levelXP)) {
+					|| (classAverageLevelInfo.nextLevelXP == currentClassInfo.nextLevelXP && classAverageLevelInfo.levelXP < currentClassInfo.levelXP)
+			) {
 				classAverageLevelInfo.levelXP = currentClassInfo.levelXP;
-				classAverageLevelInfo.nextLevelXP = currentClassInfo.nextLevelXP; // TODO: this model for XP to next level is not really correct. This is XP towards the next fifth of a level. A more correct approach would be a lot more complicated than this.
+				// TODO: this model for XP to next level is not really correct. This is XP towards the next fifth of a level. A more correct approach would be a lot more complicated than this.
+				classAverageLevelInfo.nextLevelXP = currentClassInfo.nextLevelXP;
 			}
 			classAverageLevelInfo.xp += currentClassInfo.xp;
 		}
 		double classAverage = (classAverageLevelInfo.level + classAverageLevelInfo.fill) / 5.0;
 		classAverageLevelInfo.level = (int) classAverage;
 		classAverageLevelInfo.fill = classAverage - classAverageLevelInfo.level;
-		classes.addFirst(new BarWidget("All Classes", Ico.NETHER_STAR, classAverageLevelInfo, OptionalInt.empty(), OptionalInt.empty()));
+		dungeonClassWidgets.addFirst(new BarWidget("All Classes", Ico.NETHER_STAR, classAverageLevelInfo, OptionalInt.empty(), OptionalInt.empty()));
 
-		int i = 0;
-		for (var classWidget : classes) {
-			widgets.add(widget(
-					ProfileViewerScreenRework.PAGE_WIDTH - BarWidget.WIDTH, (BarWidget.HEIGHT + 2) * i, classWidget
-			));
-			i++;
+		int dungeonClassIndex = 0;
+		int defaultDungeonsClassX = calculateX();
+		for (var widget : dungeonClassWidgets) {
+			int x = dungeonClassIndex < 6 ? 0 : ((widget.getWidth() + ProfileViewerScreenRework.GAP) + ProfileViewerScreenRework.GAP);
+			int y = (dungeonClassIndex % 6) * (2 + widget.getHeight());
+			widgets.add(widget(defaultDungeonsClassX + x, y, widget));
+			System.out.println(defaultDungeonsClassX + x);
+			dungeonClassIndex++;
 		}
 
+		int column2 = calculateX();
+		var levelWidget = widget(column2 + ProfileViewerScreenRework.GAP, 0, new BarWidget(PlayerData.Skill.CATACOMBS.getName(), PlayerData.Skill.CATACOMBS.getIcon(), PlayerData.Skill.CATACOMBS.getLevelInfo(dungeonsData.dungeonInfo.catacombs.experience), OptionalInt.empty(), OptionalInt.empty()));
+		widgets.add(levelWidget);
 		int runTotal = (int) (dungeonsData.dungeonInfo.catacombs.tierCompletions.getManuallyCalculatedTotal() + dungeonsData.dungeonInfo.masterModeCatacombs.tierCompletions.getManuallyCalculatedTotal());
-
 		widgets.add(widget(
-				0, BarWidget.HEIGHT + 5, BoxedTextWidget.boxedText(BarWidget.WIDTH - BoxedTextWidget.PADDING * 2,
+				column2 + ProfileViewerScreenRework.GAP, levelWidget.getY() + levelWidget.getHeight() + ProfileViewerScreenRework.GAP, BoxedTextWidget.boxedText(BarWidget.WIDTH - BoxedTextWidget.PADDING * 2,
 						List.of(
 								Text.of("Secrets: " + INTEGER_NUMBERS.format(dungeonsData.secrets)),
 								Text.of("Secrets/Run: " + DOUBLE_NUMBERS.format(dungeonsData.secrets / (float) runTotal))
 						))
 		));
 
-		var runWidget = widget(
-				BarWidget.WIDTH + 5, 0,
-				createFloorStatWidget(dungeonsData.dungeonInfo.catacombs, "F")
-		);
+		int column3 = calculateX();
+		var runWidget = widget(column3 + ProfileViewerScreenRework.GAP, 0, createFloorStatWidget(dungeonsData.dungeonInfo.catacombs, "F", column3 + ProfileViewerScreenRework.GAP));
 		widgets.add(runWidget);
-		widgets.add(widget(
-				BarWidget.WIDTH + 5, runWidget.getHeight() + 5,
-				createFloorStatWidget(dungeonsData.dungeonInfo.masterModeCatacombs, "M")
-		));
+		widgets.add(widget(column3 + ProfileViewerScreenRework.GAP, runWidget.getHeight() + ProfileViewerScreenRework.GAP,createFloorStatWidget(dungeonsData.dungeonInfo.masterModeCatacombs, "M", column3 + ProfileViewerScreenRework.GAP)));
 		// TODO: for tomorrow morning me: add a toggle button
 	}
 
-	ProfileViewerWidget createFloorStatWidget(GenericCatacombs cata, String prefix) {
-		return BoxedTextWidget.boxedTextWithHover(ProfileViewerScreenRework.PAGE_WIDTH - BarWidget.WIDTH * 2 - 10 - BoxedTextWidget.PADDING * 2,
+	ProfileViewerWidget createFloorStatWidget(GenericCatacombs cata, String prefix, int x) {
+		return BoxedTextWidget.boxedTextWithHover((ProfileViewerScreenRework.PAGE_WIDTH - x) - ProfileViewerScreenRework.GAP,
 				IntStream.of(1, 2, 3, 4, 5, 6, 7)
 						.mapToObj(floor ->
 								BoxedTextWidget.hover(

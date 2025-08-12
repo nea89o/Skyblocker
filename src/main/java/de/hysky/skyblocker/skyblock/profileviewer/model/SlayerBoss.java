@@ -40,7 +40,7 @@ public class SlayerBoss {
 
 	public int getTierWithMostKills() {
 		for (int i = 4; i >= 0; i--) {
-			if (getBossKillsByZeroIndexedTier(i) > 1) return i;
+			if (getBossKillsByZeroIndexedTier(i) >= 1) return i;
 		}
 		return -1;
 	}

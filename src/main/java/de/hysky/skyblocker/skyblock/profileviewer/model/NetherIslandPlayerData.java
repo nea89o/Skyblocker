@@ -1,7 +1,11 @@
 package de.hysky.skyblocker.skyblock.profileviewer.model;
 
 import com.google.gson.annotations.SerializedName;
+import de.hysky.skyblocker.skyblock.tabhud.util.Ico;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Formatting;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +13,7 @@ import java.util.Map;
 
 public class NetherIslandPlayerData {
 	@SerializedName("selected_faction")
+	@Nullable
 	public String selectedFaction;
 	@SerializedName("mages_reputation")
 	public int magesReputation;
@@ -61,6 +66,137 @@ public class NetherIslandPlayerData {
 		public int testOfControlTime;
 		@SerializedName("dojo_time_fireball")
 		public int testOfTenacityTime;
+
+		public enum DojoTest {
+			FORCE("Force", Formatting.GOLD),
+			STAMINA("Stamina", Formatting.LIGHT_PURPLE),
+			MASTERY("Mastery", Formatting.YELLOW),
+			DISCIPLINE("Discipline", Formatting.RED),
+			SWIFTNESS("Swiftness", Formatting.GREEN),
+			CONTROL("Control", Formatting.BLUE),
+			TENACITY("Tenacity", Formatting.GOLD);
+
+			private final String name;
+			private final Formatting color;
+
+			DojoTest(String name, Formatting color) {
+				this.name = name;
+				this.color = color;
+			}
+
+			public String getName() {
+				return name;
+			}
+
+			public Formatting getColor() {
+				return color;
+			}
+
+			public int getScore(Dojo dojo) {
+				return switch (this) {
+					case FORCE -> dojo.testOfForce;
+					case STAMINA -> dojo.testOfStamina;
+					case MASTERY -> dojo.testOfMastery;
+					case DISCIPLINE -> dojo.testOfDiscipline;
+					case SWIFTNESS -> dojo.testOfSwiftness;
+					case CONTROL -> dojo.testOfControl;
+					case TENACITY -> dojo.testOfTenacity;
+				};
+			}
+
+			public int getTime(Dojo dojo) {
+				return switch (this) {
+					case FORCE -> dojo.testOfForceTime;
+					case STAMINA -> dojo.testOfStaminaTime;
+					case MASTERY -> dojo.testOfMasteryTime;
+					case DISCIPLINE -> dojo.testOfDisciplineTime;
+					case SWIFTNESS -> dojo.testOfSwiftnessTime;
+					case CONTROL -> dojo.testOfControlTime;
+					case TENACITY -> dojo.testOfTenacityTime;
+				};
+			}
+		}
+
+		public static int getTotalScore(Dojo dojo) {
+			int total = 0;
+			total += dojo.testOfForce;
+			total += dojo.testOfStamina;
+			total += dojo.testOfMastery;
+			total += dojo.testOfDiscipline;
+			total += dojo.testOfSwiftness;
+			total += dojo.testOfControl;
+			total += dojo.testOfTenacity;
+			return total;
+		}
+
+		public enum ScoreRank {
+			S(1000),
+			A(800),
+			B(600),
+			C(400),
+			D(200),
+			F(0);
+
+			private final int minScore;
+
+			ScoreRank(int minScore) {
+				this.minScore = minScore;
+			}
+
+			public int getMinScore() {
+				return minScore;
+			}
+
+			public static ScoreRank fromScore(int score) {
+				for (ScoreRank rank : values()) {
+					if (score >= rank.minScore) {
+						return rank;
+					}
+				}
+				return F;
+			}
+		}
+
+		public enum Belt {
+			BLACK("Black", 7000, Formatting.BLACK),
+			BROWN("Brown", 6000, Formatting.GOLD),
+			BLUE("Blue", 4000, Formatting.BLUE),
+			GREEN("Green", 2000, Formatting.GREEN),
+			YELLOW("Yellow", 1000, Formatting.YELLOW),
+			WHITE("White", 0, Formatting.WHITE);
+
+			private final String name;
+			private final int minScore;
+			private final Formatting color;
+
+			Belt(String name, int minScore, Formatting color) {
+				this.name = name;
+				this.minScore = minScore;
+				this.color = color;
+			}
+
+			public String getName() {
+				return name;
+			}
+
+			public int getMinScore() {
+				return minScore;
+			}
+
+			public Formatting getColor() {
+				return color;
+			}
+
+			public static Belt fromScore(int score) {
+				for (Belt beltColor : values()) {
+					if (score >= beltColor.minScore) {
+						return beltColor;
+					}
+				}
+				return WHITE;
+			}
+		}
+
 	}
 
 	@SerializedName("kuudra_completed_tiers")
@@ -88,6 +224,58 @@ public class NetherIslandPlayerData {
 		public int highestFieryWave;
 		@SerializedName("highest_wave_infernal")
 		public int highestInfernalWave;
+
+		public enum Tier {
+			BASIC("Basic", Ico.KUUDRA_KEY_SKULL),
+			HOT("Hot", Ico.HOT_KUUDRA_KEY_SKULL),
+			BURNING("Burning", Ico.BURNING_KUUDRA_KEY_SKULL),
+			FIERY("Fiery", Ico.FIERY_KUUDRA_KEY_SKULL),
+			INFERNAL("Infernal", Ico.INFERNAL_KUUDRA_KEY_SKULL);
+
+			private final String name;
+			private final ItemStack itemStack;
+
+			Tier(String name, ItemStack itemStack) {
+				this.name = name;
+				this.itemStack = itemStack;
+			}
+
+			public String getName() {
+				return name;
+			}
+
+			public ItemStack getIcon() {return itemStack;}
+
+			public int getHighestWave(KuudraCompletedTiers completedTiers) {
+				return switch (this) {
+					case BASIC -> completedTiers.highestBasicWave;
+					case HOT -> completedTiers.highestHotWave;
+					case BURNING -> completedTiers.highestBurningWave;
+					case FIERY -> completedTiers.highestFieryWave;
+					case INFERNAL -> completedTiers.highestInfernalWave;
+				};
+			}
+
+			public int getCompletions(KuudraCompletedTiers completedTiers) {
+				return switch (this) {
+					case BASIC -> completedTiers.basicTier;
+					case HOT -> completedTiers.hotTier;
+					case BURNING -> completedTiers.burningTier;
+					case FIERY -> completedTiers.fieryTier;
+					case INFERNAL -> completedTiers.infernalTier;
+				};
+			}
+		}
+
+		public static int getTotalCompletions(KuudraCompletedTiers completedTiers) {
+			int total = 0;
+			total += completedTiers.basicTier;
+			total += completedTiers.burningTier;
+			total += completedTiers.fieryTier;
+			total += completedTiers.hotTier;
+			total += completedTiers.infernalTier;
+			return total;
+		}
 	}
 
 	public Abiphone abiphone = new Abiphone();

@@ -2,6 +2,7 @@ package de.hysky.skyblocker.skyblock.profileviewer;
 
 import de.hysky.skyblocker.skyblock.profileviewer.utils.ProfileViewerUtils;
 import de.hysky.skyblocker.skyblock.tabhud.util.Ico;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -18,6 +19,7 @@ public class ProfileViewerNavButton extends ClickableWidget {
 	private static final Identifier BUTTON_TEXTURES = Identifier.of("container/creative_inventory/tab_top_unselected_2");
 	private boolean toggled;
 	private final int index;
+	private final String tabName;
 	private final Consumer<ProfileViewerNavButton> onClick;
 	private final ItemStack icon;
 
@@ -33,6 +35,7 @@ public class ProfileViewerNavButton extends ClickableWidget {
 	public ProfileViewerNavButton(Consumer<ProfileViewerNavButton> onClick, String tabName, ItemStack icon, int index, boolean toggled) {
 		super(-100, -100, 28, 32, Text.empty());
 		this.onClick = onClick;
+		this.tabName = tabName;
 		this.toggled = toggled;
 		this.index = index;
 		this.icon = icon;
@@ -46,6 +49,7 @@ public class ProfileViewerNavButton extends ClickableWidget {
 	protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 		context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, toggled ? BUTTON_TEXTURES_TOGGLED : BUTTON_TEXTURES, this.getX(), this.getY(), this.width, this.height - ((this.toggled) ? 0 : 4));
 		context.drawItem(this.icon, this.getX() + 6, this.getY() + (this.toggled ? 7 : 9));
+		if (this.isHovered()) context.drawTooltip(MinecraftClient.getInstance().textRenderer, Text.of(this.tabName), mouseX, mouseY);
 	}
 
 	@Override

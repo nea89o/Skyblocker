@@ -23,5 +23,13 @@ public interface ProfileViewerPage extends Comparable<ProfileViewerPage> {
 
 	String getName();
 
+	default int calculateX() {
+		int x = 0;
+		for (ProfileViewerWidget.Instance widget : getWidgets()) {
+			if ((widget.getX() + widget.getWidth()) > x) x = widget.getX() + widget.getWidth();
+		}
+		return x;
+	}
+
 	List<ProfileViewerWidget.Instance> getWidgets();
 }

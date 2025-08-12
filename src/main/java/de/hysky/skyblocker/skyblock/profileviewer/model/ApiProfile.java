@@ -15,6 +15,5 @@ public class ApiProfile {
 	public String cuteName;
 	public Events events = new Events();
 	public Bestiary bestiary = new Bestiary();
-	// TODO: mining_core (which is broken right now)
 	public boolean selected = false;
 }

@@ -29,17 +29,29 @@ public class BoxedTextWidget implements ProfileViewerWidget {
 	final int height;
 	final List<TextWithHover> textLines;
 	final TextRenderer textRenderer;
+	final int textLeftPadding;
+	final int extraLineGap;
 
-	public BoxedTextWidget(int width, int height, List<TextWithHover> textLines, TextRenderer textRenderer) {
+	public BoxedTextWidget(int width, int height, List<TextWithHover> textLines, TextRenderer textRenderer, int textLeftPadding, int extraLineGap) {
 		this.width = width;
 		this.height = height;
 		this.textLines = textLines;
 		this.textRenderer = textRenderer;
+		this.textLeftPadding = textLeftPadding;
+		this.extraLineGap = extraLineGap;
 	}
 
 	public static BoxedTextWidget boxedTextWithHover(int width, List<TextWithHover> textLines) {
+		return boxedTextWithHover(width, textLines, 0, 0);
+	}
+
+	public static BoxedTextWidget boxedTextWithHover(int width, List<TextWithHover> textLines, int textLeftPadding) {
+		return boxedTextWithHover(width, textLines, textLeftPadding, 0);
+	}
+
+	public static BoxedTextWidget boxedTextWithHover(int width, List<TextWithHover> textLines, int textLeftPadding, int extraLineGap) {
 		var textRenderer = MinecraftClient.getInstance().textRenderer;
-		return new BoxedTextWidget(width + 2 * PADDING, (textRenderer.fontHeight + GAP) * textLines.size() - GAP + 2 * PADDING, textLines, textRenderer);
+		return new BoxedTextWidget(width + 2 * PADDING, (textRenderer.fontHeight + (GAP + extraLineGap)) * textLines.size() - (GAP + extraLineGap) + 2 * PADDING, textLines, textRenderer, textLeftPadding, extraLineGap);
 	}
 
 
@@ -52,16 +64,26 @@ public class BoxedTextWidget implements ProfileViewerWidget {
 	}
 
 	public static BoxedTextWidget boxedText(int width, Iterable<Text> textLines) {
+		return boxedText(width, textLines, 0, 0);
+	}
+
+	public static BoxedTextWidget boxedText(int width, Iterable<Text> textLines, int textLeftPadding) {
+		return boxedText(width, textLines, textLeftPadding, 0);
+	}
+
+	public static BoxedTextWidget boxedText(int width, Iterable<Text> textLines, int textLeftPadding, int extraLineGap) {
 		return boxedTextWithHover(width, StreamSupport.stream(textLines.spliterator(), false)
 				.map(it -> new TextWithHover(it, List.of()))
 				.toList()
+				, textLeftPadding
+				, extraLineGap
 		);
 	}
 
 	@Override
 	public void render(DrawContext drawContext, int x, int y, int mouseX, int mouseY, float deltaTicks) {
 		HudHelper.renderNineSliceColored(drawContext, BACKGROUND, x, y, width, height, Colors.WHITE);
-		int lineSkip = GAP + textRenderer.fontHeight;
+		int lineSkip = (GAP + extraLineGap) + textRenderer.fontHeight;
 		var matrices = drawContext.getMatrices();
 		var availableSpace = width - 2 * PADDING;
 		for (int i = 0; i < textLines.size(); i++) {
@@ -71,7 +93,7 @@ public class BoxedTextWidget implements ProfileViewerWidget {
 			matrices.translate(x + PADDING, y + PADDING + i * lineSkip + textRenderer.fontHeight / 2F);
 			if (textWidth > availableSpace)
 				matrices.scale((float) availableSpace / textWidth);
-			drawContext.drawText(textRenderer, line.text(), 0, -textRenderer.fontHeight / 2, Colors.WHITE, ProfileViewerScreenRework.TEXT_SHADOW);
+			drawContext.drawText(textRenderer, line.text(), textLeftPadding, -textRenderer.fontHeight / 2, Colors.WHITE, ProfileViewerScreenRework.TEXT_SHADOW);
 			matrices.popMatrix();
 			if (!line.hover().isEmpty() && isHovered(x + PADDING, y + PADDING + i * lineSkip, Math.min(textWidth, availableSpace), textRenderer.fontHeight, mouseX, mouseY))
 				drawContext.drawTooltip(textRenderer, line.hover(), mouseX, mouseY);

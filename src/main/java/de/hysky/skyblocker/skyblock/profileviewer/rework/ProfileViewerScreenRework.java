@@ -7,6 +7,7 @@ import com.mojang.util.UndashedUuid;
 import de.hysky.skyblocker.SkyblockerMod;
 import de.hysky.skyblocker.skyblock.profileviewer.ProfileViewerNavButton;
 import de.hysky.skyblocker.skyblock.profileviewer.model.ApiProfileResponse;
+import de.hysky.skyblocker.skyblock.tabhud.util.Ico;
 import de.hysky.skyblocker.utils.ApiUtils;
 import de.hysky.skyblocker.utils.ProfileUtils;
 import net.minecraft.client.MinecraftClient;
@@ -15,10 +16,10 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ public class ProfileViewerScreenRework extends Screen {
 	/**
 	 * Convention of whether to use text shadow in pv draw calls.
 	 */
-	public static final boolean TEXT_SHADOW = false;
+	public static final boolean TEXT_SHADOW = true;
 	public static final List<Function<ProfileLoadState.SuccessfulLoad, ProfileViewerPage>> PAGE_CONSTRUCTORS =
 			new ArrayList<>();
 
@@ -79,6 +80,8 @@ public class ProfileViewerScreenRework extends Screen {
 			var finalI = i;
 			buttons.add(new ProfileViewerNavButton(ignored -> setSelectedPage(finalI), page.getName(), page.getIcon(), i, false));
 		}
+		// TODO: Move to bottom
+		if (buttons.size() > 1) buttons.add(new ProfileViewerNavButton(ignored -> openSkyCrypt(), "SkyCrypt", Ico.SKYBLOCK_ICON_SKULL, buttons.size(), false));
 		setSelectedPage(0);
 	}
 
@@ -88,6 +91,10 @@ public class ProfileViewerScreenRework extends Screen {
 
 	public ProfileViewerPage getSelectedPage() {
 		return pages.get(selectedIndex);
+	}
+
+	public void openSkyCrypt() {
+		Util.getOperatingSystem().open("https://sky.shiiyu.moe/stats/" + ((ProfileLoadState.SuccessfulLoad) this.currentLoadState).mainMemberId() + "/" + ((ProfileLoadState.SuccessfulLoad) this.currentLoadState).profile().profileId);
 	}
 
 	public void setSelectedPage(int index) {
@@ -167,6 +174,7 @@ public class ProfileViewerScreenRework extends Screen {
 	public static final int PAGE_WIDTH = GUI_WIDTH - 10;
 	private static final int GUI_HEIGHT = 180;
 	public static final int PAGE_HEIGHT = GUI_HEIGHT - 10;
+	public static final int GAP = 5;
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {

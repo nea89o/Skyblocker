@@ -38,4 +38,7 @@ public class ProfileMember {
 	public NetherIslandPlayerData netherIslandPlayerData = new NetherIslandPlayerData();
 	@SerializedName("player_stats")
 	public PlayerStats playerStats = new PlayerStats();
+	// TODO: finish mining_core (which is broken right now)
+	@SerializedName("mining_core")
+	public MiningCore miningCore = new MiningCore();
 }

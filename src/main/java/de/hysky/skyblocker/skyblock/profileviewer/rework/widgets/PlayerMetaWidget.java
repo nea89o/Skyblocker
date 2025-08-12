@@ -1,4 +1,4 @@
-package de.hysky.skyblocker.skyblock.profileviewer.rework.pages;
+package de.hysky.skyblocker.skyblock.profileviewer.rework.widgets;
 
 import de.hysky.skyblocker.SkyblockerMod;
 import de.hysky.skyblocker.skyblock.profileviewer.rework.ProfileLoadState;

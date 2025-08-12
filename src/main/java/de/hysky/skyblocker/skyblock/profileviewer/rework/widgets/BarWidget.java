@@ -1,6 +1,7 @@
 package de.hysky.skyblocker.skyblock.profileviewer.rework.widgets;
 
 import de.hysky.skyblocker.SkyblockerMod;
+import de.hysky.skyblocker.skyblock.profileviewer.rework.ProfileViewerScreenRework;
 import de.hysky.skyblocker.skyblock.profileviewer.rework.ProfileViewerWidget;
 import de.hysky.skyblocker.skyblock.profileviewer.utils.LevelFinder;
 import de.hysky.skyblocker.utils.NEURepoManager;
@@ -61,7 +62,7 @@ public final class BarWidget implements ProfileViewerWidget {
 					   int x, int y, int mouseX, int mouseY, float deltaTicks) {
 		drawContext.drawTexture(RenderPipelines.GUI_TEXTURED, ICON_DATA_TEXTURE, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
 		drawContext.drawItem(icon, x + 3, y + 5);
-		drawContext.drawText(textRenderer, name + " " + levelInfo.level, x + 31, y + 4, -1, false);
+		drawContext.drawText(textRenderer, name + " " + levelInfo.level, x + 31, y + 4, -1, ProfileViewerScreenRework.TEXT_SHADOW);
 		Color fillColor = Color.GREEN;
 		var skillCap = levelCap.isPresent() ? levelCap.getAsInt() : NEURepoManager.getConstants().getLeveling().getMaximumLevels().getOrDefault(name.toLowerCase(Locale.ROOT), 50);
 		if (softSkillCap.isPresent() && levelInfo.level > softSkillCap.getAsInt())

@@ -70,19 +70,19 @@ public class PlayerData {
 	}
 
 	public enum Skill {
-		FISHING("Fishing", Ico.FISH_ROD),
-		ALCHEMY("Alchemy", Ico.BREWING_STAND),
+		COMBAT("Combat", Ico.STONE_SWORD),
 		//		DUNGEONEERING,
-		RUNECRAFTING("Runecrafting", Ico.MAGMA_CREAM, "Runecraft"),
 		MINING("Mining", Ico.STONE_PICKAXE),
 		FARMING("Farming", Ico.GOLDEN_HOE),
-		ENCHANTING("Enchanting", Ico.ENCHANTING_TABLE),
-		TAMING("Taming", Ico.BONE),
 		FORAGING("Foraging", Ico.JUNGLE_SAPLING),
-		SOCIAL("Social", Ico.EMERALD, "Social"),
+		FISHING("Fishing", Ico.FISH_ROD),
+		ENCHANTING("Enchanting", Ico.ENCHANTING_TABLE),
+		ALCHEMY("Alchemy", Ico.BREWING_STAND),
+		TAMING("Taming", Ico.BONE),
 		CARPENTRY("Carpentry", Ico.CRAFTING_TABLE),
 		CATACOMBS("Catacombs", Ico.CATACOMBS_SKULL, "Catacombs"),
-		COMBAT("Combat", Ico.STONE_SWORD);
+		RUNECRAFTING("Runecrafting", Ico.MAGMA_CREAM, "Runecraft"),
+		SOCIAL("Social", Ico.EMERALD, "Social");
 
 		private final String name;
 		private final ItemStack itemStack;
